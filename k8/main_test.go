@@ -23,7 +23,7 @@ func TestRunBuild(t *testing.T) {
 		Status: v1.PodStatus{},
 	})
 
-	k := &K8{client}
+	k := &K8{Client: client}
 	err := k.RunBuild()
 	assert.Nil(t, err)
 }
