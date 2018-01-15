@@ -1,0 +1,20 @@
+#!/bin/bash -e
+
+/usr/local/bin/dind dockerd \
+  --host=unix:///var/run/docker.sock \
+  --bridge=none \
+  --iptables=false \
+  --storage-driver=overlay &>/var/log/docker.log &
+
+d_timeout=$(( 60 + $SECONDS ))
+until docker info >/dev/null 2>&1
+do
+	if (( SECONDS >= d_timeout )); then
+		echo 'Timed out trying to connect to internal docker host.' >&2
+		cat /var/log/docker.log >&2
+		exit 1
+	fi
+	sleep 1
+done
+
+eval "$@"
