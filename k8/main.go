@@ -55,16 +55,14 @@ func (k *K8) imageName() string {
 
 // RunBuild starts a pod build
 func (k *K8) RunBuild() error {
-	podName := "build"
-
 	_, err := k.Client.CoreV1().Pods("default").Create(&corev1.Pod{
 		ObjectMeta: metav1.ObjectMeta{
-			Name: podName,
+			GenerateName: "build-",
 		},
 		Spec: corev1.PodSpec{
 			Containers: []corev1.Container{
 				corev1.Container{
-					Name:  podName,
+					Name:  "bobette",
 					Image: k.imageName(),
 					Env:   []corev1.EnvVar{},
 				},
