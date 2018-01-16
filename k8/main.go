@@ -9,6 +9,10 @@ import (
 	"k8s.io/client-go/tools/clientcmd"
 )
 
+var (
+	privileged = true
+)
+
 // K8 allows our cluster manipulations
 type K8 struct {
 	arch   string
@@ -64,7 +68,10 @@ func (k *K8) RunBuild() error {
 				corev1.Container{
 					Name:  "bobette",
 					Image: k.imageName(),
-					Env:   []corev1.EnvVar{},
+					SecurityContext: &corev1.SecurityContext{
+						Privileged: &privileged,
+					},
+					Env: []corev1.EnvVar{},
 				},
 			},
 			RestartPolicy: corev1.RestartPolicyNever,
