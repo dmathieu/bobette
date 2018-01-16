@@ -4,7 +4,6 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"k8s.io/client-go/kubernetes/fake"
 )
 
 func TestNew(t *testing.T) {
@@ -27,11 +26,4 @@ func TestNew(t *testing.T) {
 		assert.NotNil(t, k)
 		assert.Equal(t, "arm", k.arch)
 	})
-}
-
-func TestRunBuild(t *testing.T) {
-	client := fake.NewSimpleClientset()
-	k := &K8{Client: client}
-	err := k.RunBuild()
-	assert.Nil(t, err)
 }

@@ -6,6 +6,7 @@ import (
 
 	"github.com/dmathieu/bobette/k8"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
 var arch string
@@ -22,7 +23,9 @@ var shipCmd = &cobra.Command{
 			return err
 		}
 
-		return k.RunBuild()
+		return k.RunBuild(&k8.BuildConfig{
+			RepositoryURL: viper.Get("repository.url").(string),
+		})
 	},
 }
 
