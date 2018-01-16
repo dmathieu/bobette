@@ -11,14 +11,14 @@ import (
 
 // K8 allows our cluster manipulations
 type K8 struct {
-	Arch   string
+	arch   string
 	Client kubernetes.Interface
 }
 
 // Arch sets a CPU architecture for the kubernetes client
 func Arch(arch string) func(*K8) {
 	return func(k *K8) {
-		k.Arch = arch
+		k.arch = arch
 	}
 }
 
@@ -47,10 +47,10 @@ func client(configPath string) (*kubernetes.Clientset, error) {
 
 func (k *K8) imageName() string {
 	base := "gcr.io/dmathieu-191516/bobette"
-	if k.Arch == "" {
+	if k.arch == "" {
 		return base
 	}
-	return fmt.Sprintf("%s-%s", base, k.Arch)
+	return fmt.Sprintf("%s-%s", base, k.arch)
 }
 
 // RunBuild starts a pod build

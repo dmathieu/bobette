@@ -8,6 +8,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var arch string
+
 // github.com/dmathieu/bobette/cmd/bobette/shipCmd represents the github.com/dmathieu/bobette/cmd/bobette/ship command
 var shipCmd = &cobra.Command{
 	Use:   "ship",
@@ -15,7 +17,7 @@ var shipCmd = &cobra.Command{
 	Long:  "",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		home := homeDir()
-		k, err := k8.New(filepath.Join(home, ".kube", "config"))
+		k, err := k8.New(filepath.Join(home, ".kube", "config"), k8.Arch(arch))
 		if err != nil {
 			return err
 		}
@@ -29,4 +31,9 @@ func homeDir() string {
 		return h
 	}
 	return os.Getenv("USERPROFILE") // windows
+}
+
+func init() {
+	shipCmd.Flags().StringVar(&arch, "arch", "", "architecture to run the build on")
+	rootCmd.AddCommand(shipCmd)
 }
