@@ -1,10 +1,13 @@
 package cmd
 
 import (
+	"bytes"
+	"encoding/base64"
 	"fmt"
 	"os"
 
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
 var cfgFile string
@@ -14,9 +17,25 @@ var rootCmd = &cobra.Command{
 	Use:   "builder",
 	Short: "A docker wrapper to perform builds",
 	Long:  "",
-	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("Building")
+	RunE: func(cmd *cobra.Command, args []string) error {
+		err := readConfig()
+		if err != nil {
+			return err
+		}
+
+		fmt.Printf("Building %s\n", viper.Get("repository_url"))
+		return nil
 	},
+}
+
+func readConfig() error {
+	config, err := base64.StdEncoding.DecodeString(os.Getenv("BOBETTE_CONFIG"))
+	if err != nil {
+		return err
+	}
+	viper.SetConfigType("yaml")
+	viper.ReadConfig(bytes.NewBuffer(config))
+	return nil
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
