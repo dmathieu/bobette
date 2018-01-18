@@ -4,8 +4,10 @@ import (
 	"bytes"
 	"encoding/base64"
 	"fmt"
+	"io/ioutil"
 	"os"
 
+	"github.com/dmathieu/bobette/repo"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -23,7 +25,19 @@ var rootCmd = &cobra.Command{
 			return err
 		}
 
-		fmt.Printf("Building %s\n", viper.Get("repository_url"))
+		workDir, err := ioutil.TempDir("", "builder")
+		if err != nil {
+			return err
+		}
+		defer os.RemoveAll(workDir)
+
+		url := viper.Get("repository_url").(string)
+		fmt.Printf("Fetching %s\n", url)
+		err = repo.Pull(workDir, url)
+		if err != nil {
+			return err
+		}
+
 		return nil
 	},
 }
