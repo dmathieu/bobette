@@ -9,7 +9,7 @@ until docker info >/dev/null 2>&1
 do
 	if (( SECONDS >= d_timeout )); then
 		echo 'Timed out trying to connect to internal docker host.' >&2
-		cat /var/log/docker.log >&2
+		cat /var/log/docker.log
 		exit 1
 	fi
 	sleep 1
