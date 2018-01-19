@@ -2,7 +2,6 @@ FROM golang:1.9.2 as build
 
 WORKDIR /go/src/github.com/dmathieu/bobette
 COPY . .
-RUN go get ./...
 RUN go install ./...
 
 FROM ubuntu

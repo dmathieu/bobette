@@ -4,6 +4,3 @@ ci: tidy test
 
 test:
 	go test -race -v ./...
-
-install:
-	go get -t ./...
