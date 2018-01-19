@@ -2,8 +2,6 @@
 
 /usr/local/bin/dind dockerd \
   --host=unix:///var/run/docker.sock \
-  --bridge=none \
-  --iptables=false \
   --storage-driver=overlay &>/var/log/docker.log &
 
 d_timeout=$(( 60 + $SECONDS ))

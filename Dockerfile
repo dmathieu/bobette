@@ -25,8 +25,8 @@ RUN apt-get update \
       && apt-get install -y docker-ce=$DOCKER_VERSION \
       && rm -rf /var/lib/apt/lists/*
 VOLUME /var/lib/docker
-COPY bin/dockerd /usr/local/bin/
-ENTRYPOINT ["dockerd"]
+COPY bin/dockerd-entrypoint /usr/local/bin/
+ENTRYPOINT ["dockerd-entrypoint"]
 
 COPY --from=build /go/bin/* /usr/local/bin/
 COPY bin bin
