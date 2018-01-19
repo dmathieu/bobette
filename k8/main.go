@@ -5,10 +5,6 @@ import (
 	"k8s.io/client-go/tools/clientcmd"
 )
 
-var (
-	privileged = true
-)
-
 // K8 allows our cluster manipulations
 type K8 struct {
 	arch   string

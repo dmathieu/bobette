@@ -1,18 +1,16 @@
 package k8
 
 import (
-	"encoding/base64"
-	"encoding/json"
 	"fmt"
 
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-// BuildConfig is the build configuration, passed to the pod
-type BuildConfig struct {
-	RepositoryURL string `json:"repository_url"`
-}
+var (
+	privileged = true
+	optional   = true
+)
 
 func (k *K8) imageName() string {
 	base := "gcr.io/dmathieu-191516/bobette"
@@ -23,13 +21,8 @@ func (k *K8) imageName() string {
 }
 
 // RunBuild starts a pod build
-func (k *K8) RunBuild(c *BuildConfig) error {
-	config, err := json.Marshal(c)
-	if err != nil {
-		return err
-	}
-
-	_, err = k.Client.CoreV1().Pods("default").Create(&corev1.Pod{
+func (k *K8) RunBuild(url string) error {
+	_, err := k.Client.CoreV1().Pods("default").Create(&corev1.Pod{
 		ObjectMeta: metav1.ObjectMeta{
 			GenerateName: "build-",
 		},
@@ -43,8 +36,20 @@ func (k *K8) RunBuild(c *BuildConfig) error {
 					},
 					Env: []corev1.EnvVar{
 						corev1.EnvVar{
-							Name:  "BOBETTE_CONFIG",
-							Value: base64.StdEncoding.EncodeToString(config),
+							Name:  "REPO_URL",
+							Value: url,
+						},
+						corev1.EnvVar{
+							Name: "REPO_AUTH",
+							ValueFrom: &corev1.EnvVarSource{
+								SecretKeyRef: &corev1.SecretKeySelector{
+									LocalObjectReference: corev1.LocalObjectReference{
+										Name: "bobette",
+									},
+									Key:      "repo_auth",
+									Optional: &optional,
+								},
+							},
 						},
 					},
 				},

@@ -10,6 +10,6 @@ import (
 func TestRunBuild(t *testing.T) {
 	client := fake.NewSimpleClientset()
 	k := &K8{Client: client}
-	err := k.RunBuild(&BuildConfig{})
+	err := k.RunBuild("https://example.com")
 	assert.Nil(t, err)
 }

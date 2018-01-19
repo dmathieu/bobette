@@ -23,9 +23,7 @@ var shipCmd = &cobra.Command{
 			return err
 		}
 
-		return k.RunBuild(&k8.BuildConfig{
-			RepositoryURL: viper.Get("repository").(string),
-		})
+		return k.RunBuild(viper.GetString("repository"))
 	},
 }
 

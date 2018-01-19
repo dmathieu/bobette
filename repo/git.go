@@ -2,14 +2,43 @@ package repo
 
 import (
 	"fmt"
+	"io/ioutil"
 	"net/url"
+	"os"
 	"os/exec"
+	"path"
+	"strings"
+
+	"github.com/bgentry/go-netrc/netrc"
 )
 
-func pullGit(dir, u string) error {
+func pullGit(dir, u, user, password string) error {
 	uri, err := url.Parse(u)
 	if err != nil {
 		return err
+	}
+
+	if user != "" && password != "" {
+		netrcPath := path.Join(os.Getenv("HOME"), ".netrc")
+		n, err := netrc.ParseFile(netrcPath)
+		if err != nil {
+			return err
+		}
+
+		name := strings.Split(uri.Host, ":")[0]
+		m := n.FindMachine(name)
+		if m == nil {
+			n.NewMachine(name, user, password, "")
+
+			t, err := n.MarshalText()
+			if err != nil {
+				return err
+			}
+			err = ioutil.WriteFile(netrcPath, t, 0644)
+			if err != nil {
+				return err
+			}
+		}
 	}
 
 	gitArgs := []string{"clone"}

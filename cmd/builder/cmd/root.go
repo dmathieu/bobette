@@ -1,8 +1,6 @@
 package cmd
 
 import (
-	"bytes"
-	"encoding/base64"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -23,35 +21,25 @@ var rootCmd = &cobra.Command{
 	Short: "A docker wrapper to perform builds",
 	Long:  "",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		err := readConfig()
-		if err != nil {
-			return err
-		}
-
 		workDir, err := ioutil.TempDir("", "builder")
 		if err != nil {
 			return err
 		}
 		defer os.RemoveAll(workDir)
 
-		url := viper.GetString("repository_url")
-		return handleBuild(workDir, url, os.Stdout, os.Stderr)
+		return handleBuild(
+			workDir,
+			os.Getenv("REPO_URL"),
+			os.Getenv("REPO_AUTH"),
+			os.Stdout,
+			os.Stderr,
+		)
 	},
 }
 
-func readConfig() error {
-	config, err := base64.StdEncoding.DecodeString(os.Getenv("BOBETTE_CONFIG"))
-	if err != nil {
-		return err
-	}
-	viper.SetConfigType("yaml")
-	viper.ReadConfig(bytes.NewBuffer(config))
-	return nil
-}
-
-func handleBuild(dir, url string, stdout, stderr io.Writer) error {
+func handleBuild(dir, url, auth string, stdout, stderr io.Writer) error {
 	fmt.Printf("Fetching %s\n", url)
-	err := repo.Pull(dir, url)
+	err := repo.Pull(dir, url, auth)
 	if err != nil {
 		return err
 	}
