@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/base64"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"os"
 	"path"
@@ -33,24 +34,8 @@ var rootCmd = &cobra.Command{
 		}
 		defer os.RemoveAll(workDir)
 
-		url := viper.Get("repository_url").(string)
-		fmt.Printf("Fetching %s\n", url)
-		err = repo.Pull(workDir, url)
-		if err != nil {
-			return err
-		}
-
-		viper.SetConfigFile(path.Join(workDir, "bobette.yml"))
-		viper.ReadInConfig()
-
-		fmt.Printf("Executing commands\n")
-		commands := viper.Get("commands").([]string)
-		err = exec.Execute(workDir, commands, os.Stdout, os.Stderr)
-		if err != nil {
-			return err
-		}
-
-		return nil
+		url := viper.GetString("repository_url")
+		return handleBuild(workDir, url, os.Stdout, os.Stderr)
 	},
 }
 
@@ -62,6 +47,21 @@ func readConfig() error {
 	viper.SetConfigType("yaml")
 	viper.ReadConfig(bytes.NewBuffer(config))
 	return nil
+}
+
+func handleBuild(dir, url string, stdout, stderr io.Writer) error {
+	fmt.Printf("Fetching %s\n", url)
+	err := repo.Pull(dir, url)
+	if err != nil {
+		return err
+	}
+
+	viper.SetConfigFile(path.Join(dir, "bobette.yml"))
+	viper.ReadInConfig()
+
+	fmt.Printf("Executing commands\n")
+	commands := viper.GetStringSlice("commands")
+	return exec.Execute(dir, commands, stdout, stderr)
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.

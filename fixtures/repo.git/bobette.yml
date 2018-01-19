@@ -1,0 +1,4 @@
+repository: https://example.com
+commands:
+  - docker ps
+  - echo 'hello world'
