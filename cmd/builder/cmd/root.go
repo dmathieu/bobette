@@ -6,7 +6,9 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"path"
 
+	"github.com/dmathieu/bobette/exec"
 	"github.com/dmathieu/bobette/repo"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -34,6 +36,16 @@ var rootCmd = &cobra.Command{
 		url := viper.Get("repository_url").(string)
 		fmt.Printf("Fetching %s\n", url)
 		err = repo.Pull(workDir, url)
+		if err != nil {
+			return err
+		}
+
+		viper.SetConfigFile(path.Join(workDir, "bobette.yml"))
+		viper.ReadInConfig()
+
+		fmt.Printf("Executing commands\n")
+		commands := viper.Get("commands").([]string)
+		err = exec.Execute(workDir, commands, os.Stdout, os.Stderr)
 		if err != nil {
 			return err
 		}

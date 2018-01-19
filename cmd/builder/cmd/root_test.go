@@ -10,7 +10,6 @@ import (
 )
 
 func TestReadConfig(t *testing.T) {
-
 	t.Run("with no config set", func(t *testing.T) {
 		err := readConfig()
 		assert.Nil(t, err)
