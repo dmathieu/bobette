@@ -39,7 +39,7 @@ var rootCmd = &cobra.Command{
 
 func handleBuild(dir, url, auth string, stdout, stderr io.Writer) error {
 	fmt.Printf("Fetching %s\n", url)
-	err := repo.Pull(dir, url, auth)
+	err := repo.Pull(dir, url, auth, os.Stdout, os.Stderr)
 	if err != nil {
 		return err
 	}

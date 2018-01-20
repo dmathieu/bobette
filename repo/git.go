@@ -2,11 +2,12 @@ package repo
 
 import (
 	"fmt"
+	"io"
 	"net/url"
 	"os/exec"
 )
 
-func pullGit(dir, u, user, password string) error {
+func pullGit(dir, u, user, password string, stdout, stderr io.Writer) error {
 	uri, err := url.Parse(u)
 	if err != nil {
 		return err
@@ -33,6 +34,8 @@ func pullGit(dir, u, user, password string) error {
 	gitArgs = append(gitArgs, ".")
 
 	c := exec.Command("git", gitArgs...)
+	c.Stdout = stdout
+	c.Stderr = stderr
 	c.Dir = dir
 	err = c.Run()
 	if err != nil {
@@ -42,6 +45,8 @@ func pullGit(dir, u, user, password string) error {
 	// Checkout the specified branch, which may be a SHA.
 	if possibleSHA {
 		c = exec.Command("git", "checkout", branch)
+		c.Stdout = stdout
+		c.Stderr = stderr
 		c.Dir = dir
 		err := c.Run()
 		if err != nil {

@@ -1,6 +1,7 @@
 package repo
 
 import (
+	"bytes"
 	"errors"
 	"io/ioutil"
 	"net/http/httptest"
@@ -18,8 +19,11 @@ func TestPull(t *testing.T) {
 		assert.Nil(t, err)
 		defer os.RemoveAll(dir)
 
-		err = Pull(dir, "https://example.com", "")
+		var stdout, stderr bytes.Buffer
+		err = Pull(dir, "https://example.com", "", &stdout, &stderr)
 		assert.Equal(t, errors.New("unknown repo type"), err)
+		assert.Equal(t, "", stdout.String())
+		assert.Equal(t, "", stderr.String())
 	})
 
 	t.Run("a git repo type", func(t *testing.T) {
@@ -31,8 +35,11 @@ func TestPull(t *testing.T) {
 		assert.Nil(t, err)
 		defer os.RemoveAll(dir)
 
-		err = Pull(dir, s.URL+"/repo.git", "")
+		var stdout, stderr bytes.Buffer
+		err = Pull(dir, s.URL+"/repo.git", "", &stdout, &stderr)
 		assert.Nil(t, err)
+		assert.Equal(t, "", stdout.String())
+		assert.Equal(t, "Cloning into '.'...\n", stderr.String())
 	})
 
 	t.Run("a git repo with authentication", func(t *testing.T) {
@@ -52,7 +59,10 @@ func TestPull(t *testing.T) {
 		assert.Nil(t, err)
 		defer os.RemoveAll(dir)
 
-		err = Pull(dir, s.URL+"/repo.git", "me:mypassword")
+		var stdout, stderr bytes.Buffer
+		err = Pull(dir, s.URL+"/repo.git", "me:mypassword", &stdout, &stderr)
 		assert.Nil(t, err)
+		assert.Equal(t, "", stdout.String())
+		assert.Equal(t, "Cloning into '.'...\n", stderr.String())
 	})
 }
