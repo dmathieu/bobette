@@ -1,7 +1,6 @@
 package k8
 
 import (
-	"encoding/base64"
 	"fmt"
 
 	corev1 "k8s.io/api/core/v1"
@@ -23,9 +22,12 @@ func (k *K8) imageName() string {
 
 // RunBuild starts a pod build
 func (k *K8) RunBuild(url string) error {
-	secretName := fmt.Sprintf("bobette-%s", base64.StdEncoding.EncodeToString([]byte(url)))
+	env, err := k.buildEnvironment(url)
+	if err != nil {
+		return err
+	}
 
-	_, err := k.Client.CoreV1().Pods("default").Create(&corev1.Pod{
+	_, err = k.Client.CoreV1().Pods("default").Create(&corev1.Pod{
 		ObjectMeta: metav1.ObjectMeta{
 			GenerateName: "build-",
 		},
@@ -37,24 +39,7 @@ func (k *K8) RunBuild(url string) error {
 					SecurityContext: &corev1.SecurityContext{
 						Privileged: &privileged,
 					},
-					Env: []corev1.EnvVar{
-						corev1.EnvVar{
-							Name:  "REPO_URL",
-							Value: url,
-						},
-						corev1.EnvVar{
-							Name: "REPO_AUTH",
-							ValueFrom: &corev1.EnvVarSource{
-								SecretKeyRef: &corev1.SecretKeySelector{
-									LocalObjectReference: corev1.LocalObjectReference{
-										Name: secretName,
-									},
-									Key:      "repo_auth",
-									Optional: &optional,
-								},
-							},
-						},
-					},
+					Env: env,
 				},
 			},
 			RestartPolicy: corev1.RestartPolicyNever,
