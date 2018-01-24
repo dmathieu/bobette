@@ -1,6 +1,7 @@
 package k8
 
 import (
+	"encoding/base64"
 	"fmt"
 
 	corev1 "k8s.io/api/core/v1"
@@ -22,6 +23,8 @@ func (k *K8) imageName() string {
 
 // RunBuild starts a pod build
 func (k *K8) RunBuild(url string) error {
+	secretName := fmt.Sprintf("bobette-%s", base64.StdEncoding.EncodeToString([]byte(url)))
+
 	_, err := k.Client.CoreV1().Pods("default").Create(&corev1.Pod{
 		ObjectMeta: metav1.ObjectMeta{
 			GenerateName: "build-",
@@ -44,7 +47,7 @@ func (k *K8) RunBuild(url string) error {
 							ValueFrom: &corev1.EnvVarSource{
 								SecretKeyRef: &corev1.SecretKeySelector{
 									LocalObjectReference: corev1.LocalObjectReference{
-										Name: "bobette",
+										Name: secretName,
 									},
 									Key:      "repo_auth",
 									Optional: &optional,
