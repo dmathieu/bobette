@@ -16,13 +16,13 @@ func (k *K8) secretName(url string) string {
 
 // SetSecret sets a config value in the specified url's secret
 func (k *K8) SetSecret(url, key string, value []byte) error {
-	s, err := k.Client.CoreV1().Secrets("default").Get(k.secretName(url), metav1.GetOptions{})
+	s, err := k.Client.CoreV1().Secrets(defaultNamespace).Get(k.secretName(url), metav1.GetOptions{})
 	if err != nil && err.(*errors.StatusError).ErrStatus.Code == http.StatusNotFound {
 		// We need to create the secret
-		_, err = k.Client.CoreV1().Secrets("default").Create(&corev1.Secret{
+		_, err = k.Client.CoreV1().Secrets(defaultNamespace).Create(&corev1.Secret{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      k.secretName(url),
-				Namespace: "default",
+				Namespace: defaultNamespace,
 			},
 			Data: map[string][]byte{key: value},
 		})
@@ -34,19 +34,19 @@ func (k *K8) SetSecret(url, key string, value []byte) error {
 	} else {
 		s.Data[key] = value
 	}
-	_, err = k.Client.CoreV1().Secrets("default").Update(s)
+	_, err = k.Client.CoreV1().Secrets(defaultNamespace).Update(s)
 	return err
 }
 
 // GetSecret returns the specified url's secret
 func (k *K8) GetSecret(url string) (*corev1.Secret, error) {
-	s, err := k.Client.CoreV1().Secrets("default").Get(k.secretName(url), metav1.GetOptions{})
+	s, err := k.Client.CoreV1().Secrets(defaultNamespace).Get(k.secretName(url), metav1.GetOptions{})
 	if err != nil {
 		if err.(*errors.StatusError).ErrStatus.Code == http.StatusNotFound {
 			return &corev1.Secret{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      k.secretName(url),
-					Namespace: "default",
+					Namespace: defaultNamespace,
 				},
 			}, nil
 		}

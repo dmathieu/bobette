@@ -27,7 +27,7 @@ func (k *K8) RunBuild(url string) error {
 		return err
 	}
 
-	_, err = k.Client.CoreV1().Pods("default").Create(&corev1.Pod{
+	_, err = k.Client.CoreV1().Pods(defaultNamespace).Create(&corev1.Pod{
 		ObjectMeta: metav1.ObjectMeta{
 			GenerateName: "build-",
 		},

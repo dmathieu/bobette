@@ -5,6 +5,10 @@ import (
 	"k8s.io/client-go/tools/clientcmd"
 )
 
+const (
+	defaultNamespace = "default"
+)
+
 // K8 allows our cluster manipulations
 type K8 struct {
 	arch   string

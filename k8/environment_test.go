@@ -29,7 +29,7 @@ func TestBuildEnvironment(t *testing.T) {
 		secret := &corev1.Secret{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      fmt.Sprintf("bobette-%s", base64.StdEncoding.EncodeToString([]byte(url))),
-				Namespace: "default",
+				Namespace: defaultNamespace,
 			},
 			Data: map[string][]byte{
 				"foo":   []byte("bar"),
