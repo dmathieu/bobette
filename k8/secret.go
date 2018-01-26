@@ -4,6 +4,7 @@ import (
 	"encoding/base64"
 	"fmt"
 	"net/http"
+	"strings"
 
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -11,7 +12,7 @@ import (
 )
 
 func (k *K8) secretName(url string) string {
-	return fmt.Sprintf("bobette-%s", base64.StdEncoding.EncodeToString([]byte(url)))
+	return strings.ToLower(fmt.Sprintf("bobette-%s", base64.StdEncoding.EncodeToString([]byte(url))))
 }
 
 // SetSecret sets a config value in the specified url's secret
