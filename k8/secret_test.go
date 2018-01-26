@@ -2,6 +2,7 @@ package k8
 
 import (
 	"encoding/base64"
+	"errors"
 	"fmt"
 	"strings"
 	"testing"
@@ -14,6 +15,14 @@ import (
 
 func TestSetSecret(t *testing.T) {
 	url := "https://example.com"
+
+	t.Run("with no values", func(t *testing.T) {
+		client := fake.NewSimpleClientset()
+		k := &K8{Client: client}
+
+		err := k.SetSecret(url)
+		assert.Equal(t, errors.New("no config provided. Need config vars in the format 'key=value'"), err)
+	})
 
 	t.Run("when the secret does not exist yet", func(t *testing.T) {
 		client := fake.NewSimpleClientset()
@@ -82,6 +91,28 @@ func TestSetSecret(t *testing.T) {
 		k := &K8{Client: client}
 
 		err := k.SetSecret(url, "foo=")
+		assert.Nil(t, err)
+
+		s, err := k.GetSecret(url)
+		assert.Nil(t, err)
+		assert.Equal(t, 1, len(s.Data))
+	})
+
+	t.Run("when removing a value without an equal sign", func(t *testing.T) {
+		secret := &corev1.Secret{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      strings.ToLower(fmt.Sprintf("bobette-%s", base64.StdEncoding.EncodeToString([]byte(url)))),
+				Namespace: defaultNamespace,
+			},
+			Data: map[string][]byte{
+				"foo":   []byte("bar"),
+				"hello": []byte("world"),
+			},
+		}
+		client := fake.NewSimpleClientset(secret)
+		k := &K8{Client: client}
+
+		err := k.SetSecret(url, "foo")
 		assert.Nil(t, err)
 
 		s, err := k.GetSecret(url)
