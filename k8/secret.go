@@ -19,7 +19,12 @@ func (k *K8) GetSecret(url string) (*corev1.Secret, error) {
 	s, err := k.Client.CoreV1().Secrets("default").Get(k.secretName(url), metav1.GetOptions{})
 	if err != nil {
 		if err.(*errors.StatusError).ErrStatus.Code == http.StatusNotFound {
-			return &corev1.Secret{}, nil
+			return &corev1.Secret{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      k.secretName(url),
+					Namespace: "default",
+				},
+			}, nil
 		}
 		return nil, err
 	}
