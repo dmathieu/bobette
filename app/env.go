@@ -17,7 +17,7 @@ var envTemplate = template.Must(template.New("notificationContent").Parse(`Env c
 
 {{if .Data}}Secrets:
 {{range $k, $v := .Data}}
-  * {{$k}} - {{$v}}
+  * {{$k}}
 {{end}}{{else}}There are no secrets to show at the moment.{{end}}
 Use 'bobette env set' to set a new secret.
 `))
