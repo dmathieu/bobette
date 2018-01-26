@@ -3,6 +3,7 @@ package k8
 import (
 	"encoding/base64"
 	"fmt"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -28,7 +29,7 @@ func TestBuildEnvironment(t *testing.T) {
 	t.Run("with secrets set", func(t *testing.T) {
 		secret := &corev1.Secret{
 			ObjectMeta: metav1.ObjectMeta{
-				Name:      fmt.Sprintf("bobette-%s", base64.StdEncoding.EncodeToString([]byte(url))),
+				Name:      strings.ToLower(fmt.Sprintf("bobette-%s", base64.StdEncoding.EncodeToString([]byte(url)))),
 				Namespace: defaultNamespace,
 			},
 			Data: map[string][]byte{

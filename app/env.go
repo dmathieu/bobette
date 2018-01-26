@@ -5,7 +5,6 @@ import (
 	"html/template"
 	"os"
 	"path/filepath"
-	"strings"
 
 	"github.com/dmathieu/bobette/k8"
 	"github.com/spf13/cobra"
@@ -54,9 +53,8 @@ var envSetCmd = &cobra.Command{
 			return err
 		}
 
-		data := strings.Split(args[0], "=")
-		fmt.Fprintf(os.Stdout, "Setting %s config...", data[0])
-		err = k.SetSecret(viper.GetString("repository"), data[0], []byte(data[1]))
+		fmt.Fprintf(os.Stdout, "Setting config...")
+		err = k.SetSecret(viper.GetString("repository"), args...)
 		if err != nil {
 			return err
 		}

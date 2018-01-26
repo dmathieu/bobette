@@ -16,7 +16,17 @@ func (k *K8) secretName(url string) string {
 }
 
 // SetSecret sets a config value in the specified url's secret
-func (k *K8) SetSecret(url, key string, value []byte) error {
+func (k *K8) SetSecret(url string, args ...string) error {
+	data := map[string][]byte{}
+	for _, e := range args {
+		d := strings.Split(e, "=")
+		if len(d[1]) == 0 {
+			data[d[0]] = nil
+		} else {
+			data[d[0]] = []byte(base64.StdEncoding.EncodeToString([]byte(d[1])))
+		}
+	}
+
 	s, err := k.Client.CoreV1().Secrets(defaultNamespace).Get(k.secretName(url), metav1.GetOptions{})
 	if err != nil && err.(*errors.StatusError).ErrStatus.Code == http.StatusNotFound {
 		// We need to create the secret
@@ -25,15 +35,17 @@ func (k *K8) SetSecret(url, key string, value []byte) error {
 				Name:      k.secretName(url),
 				Namespace: defaultNamespace,
 			},
-			Data: map[string][]byte{key: []byte(base64.StdEncoding.EncodeToString(value))},
+			Data: data,
 		})
 		return err
 	}
 
-	if value == nil {
-		delete(s.Data, key)
-	} else {
-		s.Data[key] = []byte(base64.StdEncoding.EncodeToString(value))
+	for key, value := range data {
+		if value == nil {
+			delete(s.Data, key)
+		} else {
+			s.Data[key] = value
+		}
 	}
 	_, err = k.Client.CoreV1().Secrets(defaultNamespace).Update(s)
 	return err
