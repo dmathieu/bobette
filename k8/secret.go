@@ -24,7 +24,7 @@ func (k *K8) SetSecret(url, key string, value []byte) error {
 				Name:      k.secretName(url),
 				Namespace: defaultNamespace,
 			},
-			Data: map[string][]byte{key: value},
+			Data: map[string][]byte{key: []byte(base64.StdEncoding.EncodeToString(value))},
 		})
 		return err
 	}
@@ -32,7 +32,7 @@ func (k *K8) SetSecret(url, key string, value []byte) error {
 	if value == nil {
 		delete(s.Data, key)
 	} else {
-		s.Data[key] = value
+		s.Data[key] = []byte(base64.StdEncoding.EncodeToString(value))
 	}
 	_, err = k.Client.CoreV1().Secrets(defaultNamespace).Update(s)
 	return err
