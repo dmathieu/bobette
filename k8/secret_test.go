@@ -11,6 +11,65 @@ import (
 	"k8s.io/client-go/kubernetes/fake"
 )
 
+func TestSetSecret(t *testing.T) {
+	url := "https://example.com"
+
+	t.Run("when the secret does not exist yet", func(t *testing.T) {
+		client := fake.NewSimpleClientset()
+		k := &K8{Client: client}
+
+		err := k.SetSecret(url, "foo", []byte("bar"))
+		assert.Nil(t, err)
+
+		s, err := k.GetSecret(url)
+		assert.Nil(t, err)
+		assert.Equal(t, 1, len(s.Data))
+	})
+
+	t.Run("when the secret already exists", func(t *testing.T) {
+		secret := &corev1.Secret{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      fmt.Sprintf("bobette-%s", base64.StdEncoding.EncodeToString([]byte(url))),
+				Namespace: "default",
+			},
+			Data: map[string][]byte{
+				"hello": []byte("world"),
+			},
+		}
+		client := fake.NewSimpleClientset(secret)
+		k := &K8{Client: client}
+
+		err := k.SetSecret(url, "foo", []byte("bar"))
+		assert.Nil(t, err)
+
+		s, err := k.GetSecret(url)
+		assert.Nil(t, err)
+		assert.Equal(t, 2, len(s.Data))
+	})
+
+	t.Run("when removing a value", func(t *testing.T) {
+		secret := &corev1.Secret{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      fmt.Sprintf("bobette-%s", base64.StdEncoding.EncodeToString([]byte(url))),
+				Namespace: "default",
+			},
+			Data: map[string][]byte{
+				"foo":   []byte("bar"),
+				"hello": []byte("world"),
+			},
+		}
+		client := fake.NewSimpleClientset(secret)
+		k := &K8{Client: client}
+
+		err := k.SetSecret(url, "foo", []byte(nil))
+		assert.Nil(t, err)
+
+		s, err := k.GetSecret(url)
+		assert.Nil(t, err)
+		assert.Equal(t, 1, len(s.Data))
+	})
+}
+
 func TestGetSecret(t *testing.T) {
 	url := "https://example.com"
 
