@@ -12,17 +12,33 @@ var (
 	optional   = true
 )
 
-func (k *K8) imageName() string {
-	base := "gcr.io/dmathieu-191516/bobette"
+func (k *K8) imageName() (string, error) {
+	name := "gcr.io/dmathieu-191516/bobette"
 	if k.arch == "" {
-		return base
+		m, err := k.masterNode()
+		if err != nil {
+			return "", err
+		}
+		k.arch = m.Status.NodeInfo.Architecture
 	}
-	return fmt.Sprintf("%s-%s", base, k.arch)
+
+	switch k.arch {
+	case "amd64":
+		// Amd64 is the default image. Do nothing
+	default:
+		name = fmt.Sprintf("%s-%s", name, k.arch)
+	}
+
+	return name, nil
 }
 
 // RunBuild starts a pod build
 func (k *K8) RunBuild(url string) error {
 	env, err := k.buildEnvironment(url)
+	if err != nil {
+		return err
+	}
+	imageName, err := k.imageName()
 	if err != nil {
 		return err
 	}
@@ -35,7 +51,7 @@ func (k *K8) RunBuild(url string) error {
 			Containers: []corev1.Container{
 				corev1.Container{
 					Name:  "bobette",
-					Image: k.imageName(),
+					Image: imageName,
 					SecurityContext: &corev1.SecurityContext{
 						Privileged: &privileged,
 					},
