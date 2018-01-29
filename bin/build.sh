@@ -7,5 +7,5 @@ echo $GCR_TOKEN | docker login \
   gcr.io
 
 imageName=gcr.io/dmathieu-191516/bobette-$ARCH
-docker build -t $imageName .
+docker build -f Dockerfile.$ARCH -t $imageName .
 docker push $imageName
