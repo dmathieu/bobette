@@ -3,6 +3,7 @@ package k8
 import (
 	"encoding/base64"
 	"fmt"
+	"sort"
 	"strings"
 	"testing"
 
@@ -43,8 +44,12 @@ func TestBuildEnvironment(t *testing.T) {
 		d, err := k.buildEnvironment(url)
 		assert.Nil(t, err)
 		assert.Equal(t, 3, len(d))
-		assert.Equal(t, "REPO_URL", d[0].Name)
-		assert.Equal(t, "FOO", d[1].Name)
-		assert.Equal(t, "HELLO", d[2].Name)
+
+		names := []string{}
+		for _, v := range d {
+			names = append(names, v.Name)
+		}
+		sort.Strings(names)
+		assert.Equal(t, []string{"FOO", "HELLO", "REPO_URL"}, names)
 	})
 }
