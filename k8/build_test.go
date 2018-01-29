@@ -19,15 +19,6 @@ func TestImageName(t *testing.T) {
 		assert.Equal(t, "gcr.io/dmathieu-191516/bobette-arm", i)
 	})
 
-	t.Run("when the arch is set manually to amd64", func(t *testing.T) {
-		client := fake.NewSimpleClientset()
-		k := &K8{Client: client, arch: "amd64"}
-
-		i, err := k.imageName()
-		assert.Nil(t, err)
-		assert.Equal(t, "gcr.io/dmathieu-191516/bobette", i)
-	})
-
 	t.Run("when the arch is not set manually", func(t *testing.T) {
 		node := &corev1.Node{
 			ObjectMeta: metav1.ObjectMeta{

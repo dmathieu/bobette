@@ -7,13 +7,16 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
+const (
+	imageBase = "gcr.io/dmathieu-191516/bobette"
+)
+
 var (
 	privileged = true
 	optional   = true
 )
 
 func (k *K8) imageName() (string, error) {
-	name := "gcr.io/dmathieu-191516/bobette"
 	if k.arch == "" {
 		m, err := k.masterNode()
 		if err != nil {
@@ -21,15 +24,7 @@ func (k *K8) imageName() (string, error) {
 		}
 		k.arch = m.Status.NodeInfo.Architecture
 	}
-
-	switch k.arch {
-	case "amd64":
-		// Amd64 is the default image. Do nothing
-	default:
-		name = fmt.Sprintf("%s-%s", name, k.arch)
-	}
-
-	return name, nil
+	return fmt.Sprintf("%s-%s", imageBase, k.arch), nil
 }
 
 // RunBuild starts a pod build
