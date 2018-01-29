@@ -8,6 +8,10 @@ import (
 )
 
 func (k *K8) masterNode() (corev1.Node, error) {
+	if k.master.ObjectMeta.Name != "" {
+		return k.master, nil
+	}
+
 	l, err := k.Client.CoreV1().Nodes().List(metav1.ListOptions{
 		LabelSelector: "node-role.kubernetes.io/master",
 	})
@@ -18,5 +22,6 @@ func (k *K8) masterNode() (corev1.Node, error) {
 	if len(l.Items) == 0 {
 		return corev1.Node{}, errors.New("no master node found")
 	}
-	return l.Items[0], err
+	k.master = l.Items[0]
+	return k.master, err
 }

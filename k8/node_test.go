@@ -11,6 +11,19 @@ import (
 )
 
 func TestMasterNode(t *testing.T) {
+	t.Run("with a memoized node", func(t *testing.T) {
+		client := fake.NewSimpleClientset()
+		k := &K8{Client: client, master: corev1.Node{
+			ObjectMeta: metav1.ObjectMeta{
+				Name: "fakenode",
+			},
+		}}
+
+		n, err := k.masterNode()
+		assert.Nil(t, err)
+		assert.Equal(t, "fakenode", n.ObjectMeta.Name)
+	})
+
 	t.Run("with no nodes", func(t *testing.T) {
 		client := fake.NewSimpleClientset()
 		k := &K8{Client: client}

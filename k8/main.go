@@ -1,6 +1,7 @@
 package k8
 
 import (
+	corev1 "k8s.io/api/core/v1"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/clientcmd"
 )
@@ -12,6 +13,8 @@ const (
 // K8 allows our cluster manipulations
 type K8 struct {
 	arch   string
+	master corev1.Node
+
 	Client kubernetes.Interface
 }
 
