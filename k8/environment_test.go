@@ -18,13 +18,28 @@ func TestBuildEnvironment(t *testing.T) {
 
 	t.Run("with no secret set", func(t *testing.T) {
 		client := fake.NewSimpleClientset()
-		k := &K8{Client: client}
+		k := &K8{Client: client, master: corev1.Node{
+			ObjectMeta: metav1.ObjectMeta{
+				Name: "master",
+			},
+			Status: corev1.NodeStatus{
+				NodeInfo: corev1.NodeSystemInfo{
+					Architecture: "amd",
+				},
+			},
+		}}
 
 		d, err := k.buildEnvironment(url)
 		assert.Nil(t, err)
-		assert.Equal(t, 1, len(d))
+		assert.Equal(t, 2, len(d))
 		assert.Equal(t, "REPO_URL", d[0].Name)
-		assert.Equal(t, url, d[0].Value)
+
+		names := []string{}
+		for _, v := range d {
+			names = append(names, v.Name)
+		}
+		sort.Strings(names)
+		assert.Equal(t, []string{"ARCH", "REPO_URL"}, names)
 	})
 
 	t.Run("with secrets set", func(t *testing.T) {
@@ -39,17 +54,26 @@ func TestBuildEnvironment(t *testing.T) {
 			},
 		}
 		client := fake.NewSimpleClientset(secret)
-		k := &K8{Client: client}
+		k := &K8{Client: client, master: corev1.Node{
+			ObjectMeta: metav1.ObjectMeta{
+				Name: "master",
+			},
+			Status: corev1.NodeStatus{
+				NodeInfo: corev1.NodeSystemInfo{
+					Architecture: "amd",
+				},
+			},
+		}}
 
 		d, err := k.buildEnvironment(url)
 		assert.Nil(t, err)
-		assert.Equal(t, 3, len(d))
+		assert.Equal(t, 4, len(d))
 
 		names := []string{}
 		for _, v := range d {
 			names = append(names, v.Name)
 		}
 		sort.Strings(names)
-		assert.Equal(t, []string{"FOO", "HELLO", "REPO_URL"}, names)
+		assert.Equal(t, []string{"ARCH", "FOO", "HELLO", "REPO_URL"}, names)
 	})
 }

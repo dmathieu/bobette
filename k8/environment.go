@@ -13,6 +13,16 @@ func (k *K8) buildEnvironment(url string) ([]corev1.EnvVar, error) {
 			Value: url,
 		},
 	}
+
+	m, err := k.masterNode()
+	if err != nil {
+		return d, err
+	}
+	d = append(d, corev1.EnvVar{
+		Name:  "ARCH",
+		Value: m.Status.NodeInfo.Architecture,
+	})
+
 	s, err := k.GetSecret(url)
 	if err != nil {
 		return d, err

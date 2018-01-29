@@ -53,7 +53,16 @@ func TestImageName(t *testing.T) {
 
 func TestRunBuild(t *testing.T) {
 	client := fake.NewSimpleClientset()
-	k := &K8{Client: client, arch: "amd64"}
+	k := &K8{Client: client, master: corev1.Node{
+		ObjectMeta: metav1.ObjectMeta{
+			Name: "master",
+		},
+		Status: corev1.NodeStatus{
+			NodeInfo: corev1.NodeSystemInfo{
+				Architecture: "amd",
+			},
+		},
+	}}
 	err := k.RunBuild("https://example.com")
 	assert.Nil(t, err)
 }
