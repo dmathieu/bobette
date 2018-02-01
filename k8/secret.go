@@ -28,7 +28,7 @@ func (k *K8) SetSecret(url string, args ...string) error {
 		if len(d) == 1 || len(d[1]) == 0 {
 			data[d[0]] = nil
 		} else {
-			data[d[0]] = []byte(base64.StdEncoding.EncodeToString([]byte(d[1])))
+			data[d[0]] = []byte(d[1])
 		}
 	}
 
